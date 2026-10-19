@@ -42,6 +42,7 @@
     </section>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
+      // Each object supplies one category label and its numeric bar value.
       const data = [
         { name: "A", value: 1 },
         { name: "B", value: 5 },
@@ -49,44 +50,60 @@
         { name: "D", value: 10 }
       ];
 
+      // Margins reserve room for the axes; the bottom and left need space for their tick labels.
       const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+      // The SVG's full drawing size, in pixels before it is scaled by the viewBox.
       const width = 600;
       const height = 360;
+      // The plot area is the full SVG minus the space reserved around it for margins and axes.
       const chartWidth = width - margin.left - margin.right;
       const chartHeight = height - margin.top - margin.bottom;
 
+      // Select the chart container and create a scalable SVG with an accessible description.
       const svg = d3.select("#chart")
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("role", "img")
         .attr("aria-label", "Bar chart showing values for A, B, C, and D");
 
+      // Move the plot origin inward so the axes fit within the SVG margins.
       const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+      // A band scale assigns one evenly spaced horizontal slot to each category.
       const x = d3.scaleBand()
         .domain(data.map(d => d.name))
         .range([0, chartWidth])
+        // Leave 20% of each category slot as space between neighboring bars.
         .padding(0.2);
 
+      // A linear scale maps values to vertical positions; D3's SVG y-axis grows downward,
+      // so the range is reversed to place larger values higher in the plot.
       const y = d3.scaleLinear()
+        // Start at zero and extend to the largest data value.
         .domain([0, d3.max(data, d => d.value)])
+        // Round the upper domain boundary to a convenient tick value.
         .nice()
         .range([chartHeight, 0]);
 
+      // Place the category axis at the bottom edge of the plot and generate its ticks from x.
       chart.append("g")
         .attr("transform", `translate(0,${chartHeight})`)
         .call(d3.axisBottom(x));
 
+      // Generate the value axis using the same scale that positions the bars vertically.
       chart.append("g")
         .call(d3.axisLeft(y));
 
+      // Bind the data to rectangles; each callback's d is the current category/value object.
       chart.selectAll("rect")
         .data(data)
+        // Create one rectangle per datum, or reuse existing rectangles if the data changes.
         .join("rect")
         .attr("x", d => x(d.name))
         .attr("y", d => y(d.value))
         .attr("width", x.bandwidth())
+        // SVG rectangles start at their top edge, so height is the distance from y(value) to the baseline.
         .attr("height", d => chartHeight - y(d.value))
         .attr("fill", "steelblue");
     </script>
