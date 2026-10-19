@@ -11,7 +11,7 @@
     <details open>
       <summary>About Me</summary>
       <p>Data Specialist with polyvalent experience bridging information design, business strategy, and technical analytics
-        Currently learning D3 & React
+        Currently learning D3 & React!!
       </p>
                    </details>
 
@@ -36,5 +36,59 @@
 <p> Find me as <a href= "https://www.instagram.com/melavilax" target="_blank"/>@melavilax</a>
 </p>
 </footer>
+    <section aria-labelledby="chart-title">
+      <h2 id="chart-title">Values</h2>
+      <div id="chart"></div>
+    </section>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+      const data = [
+        { name: "A", value: 1 },
+        { name: "B", value: 5 },
+        { name: "C", value: 8 },
+        { name: "D", value: 10 }
+      ];
+
+      const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+      const width = 600;
+      const height = 360;
+      const chartWidth = width - margin.left - margin.right;
+      const chartHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select("#chart")
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("role", "img")
+        .attr("aria-label", "Bar chart showing values for A, B, C, and D");
+
+      const chart = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleBand()
+        .domain(data.map(d => d.name))
+        .range([0, chartWidth])
+        .padding(0.2);
+
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.value)])
+        .nice()
+        .range([chartHeight, 0]);
+
+      chart.append("g")
+        .attr("transform", `translate(0,${chartHeight})`)
+        .call(d3.axisBottom(x));
+
+      chart.append("g")
+        .call(d3.axisLeft(y));
+
+      chart.selectAll("rect")
+        .data(data)
+        .join("rect")
+        .attr("x", d => x(d.name))
+        .attr("y", d => y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("height", d => chartHeight - y(d.value))
+        .attr("fill", "steelblue");
+    </script>
   </body>
 </html>
